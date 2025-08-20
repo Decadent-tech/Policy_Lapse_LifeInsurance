@@ -43,7 +43,7 @@ Policy_Lapse_LifeInsurance/
 
     Clone the repo:
 
-        git clone https://github.com/yourusername/Policy_Lapse_LifeInsurance.git
+        git clone https://github.com/Decadent-tech/Policy_Lapse_LifeInsurance
         cd Policy_Lapse_LifeInsurance
 
 
