@@ -58,7 +58,7 @@ Policy_Lapse_LifeInsurance/
 
 ## Deploy the model with Streamlit
 
-        ![Policy Lapse Dashboard](https://github.com/Decadent-tech/Policy_Lapse_LifeInsurance/blob/main/Dashboard.jpg)
+        ![Policy Lapse Dashboard](https://github.com/Decadent-tech/Policy_Lapse_LifeInsurance/raw/main/Dashboard.jpg)
 
 ## Next Steps
 
