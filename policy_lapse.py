@@ -718,33 +718,47 @@ plt.show()
 
 # Recursive Feature Elimination (RFE),
 from sklearn.feature_selection import RFE
-# Using RFE with Random Forest
-rfe_rf = RFE(estimator=rf_classifier_best_value, n_features_to_select=10)
-rfe_rf.fit(X_train_encoded, y_train)
-# Get the selected features
-selected_features_rf = X_train_encoded.columns[rfe_rf.support_]
-print("Selected features using RFE with Random Forest:")
-print(selected_features_rf)
-# Using RFE with XG Boost
-rfe_xgb = RFE(estimator=xg_classifier, n_features_to_select=10)
-rfe_xgb.fit(X_train_encoded, y_train)
-# Get the selected features
-selected_features_xgb = X_train_encoded.columns[rfe_xgb.support_]
-print("Selected features using RFE with XG Boost:")
-print(selected_features_xgb)
-# Using RFE with XG Boost Feature Selected Random Forest
+
+# Recursive Feature Elimination with Random Forest
 rfe_xgb_rf = RFE(estimator=rf_model, n_features_to_select=10)
 rfe_xgb_rf.fit(X_train_xgb_encoded, y_train)
-# Get the selected features
+
 selected_features_xgb_rf = X_train_xgb_encoded.columns[rfe_xgb_rf.support_]
-print("Selected features using RFE with XG Boost Feature Selected Random Forest:")
-print(selected_features_xgb_rf)
-# Using RFE with XG Boost Feature Selected XG Boost
+feature_ranking_rf = pd.DataFrame({
+    "Feature": X_train_xgb_encoded.columns,
+    "Selected_RF": rfe_xgb_rf.support_,
+    "Ranking_RF": rfe_xgb_rf.ranking_
+}).sort_values("Ranking_RF")
+
+print("Selected features using RFE with Random Forest:")
+print(selected_features_xgb_rf.tolist())
+
+# Recursive Feature Elimination with XG Boost
 rfe_xgb_xgb = RFE(estimator=xgb_xgb_model, n_features_to_select=10)
 rfe_xgb_xgb.fit(X_train_xgb_encoded, y_train)
-# Get the selected features
-selected_features_xgb_xgb = X_train_xgb_encoded.columns[rfe_xgb_xgb.support_]
-print("Selected features using RFE with XG Boost Feature Selected XG Boost:")
-print(selected_features_xgb_xgb)
-# The selected features from RFE can be used for further analysis or model training.
 
+selected_features_xgb_xgb = X_train_xgb_encoded.columns[rfe_xgb_xgb.support_]
+feature_ranking_xgb = pd.DataFrame({
+    "Feature": X_train_xgb_encoded.columns,
+    "Selected_XGB": rfe_xgb_xgb.support_,
+    "Ranking_XGB": rfe_xgb_xgb.ranking_
+}).sort_values("Ranking_XGB")
+
+print("Selected features using RFE with XGBoost:")
+print(selected_features_xgb_xgb.tolist())
+
+comparison_df = pd.merge(feature_ranking_rf, feature_ranking_xgb, on="Feature")
+print("Feature Ranking Comparison:")
+print(comparison_df.head(15))  # show top 15
+
+common_features = set(selected_features_xgb_rf).intersection(set(selected_features_xgb_xgb))
+print(f"Common Selected Features (RF ∩ XGB): {list(common_features)}")
+
+plt.figure(figsize=(10, 6))
+comparison_df.set_index("Feature")[["Ranking_RF", "Ranking_XGB"]].plot.barh(figsize=(12, 8))
+plt.title("RFE Feature Ranking: RF vs XGB")
+plt.xlabel("Ranking (Lower = Better)")
+plt.ylabel("Feature")
+plt.gca().invert_yaxis()
+plt.savefig('Visualization/RFE_Feature_Ranking_RF_vs_XGB.png', bbox_inches='tight')
+plt.show()
