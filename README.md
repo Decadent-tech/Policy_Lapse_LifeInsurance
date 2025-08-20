@@ -58,7 +58,7 @@ Policy_Lapse_LifeInsurance/
 
 ## Deploy the model with Streamlit
 
-        ![Policy Lapse Dashboard](Dashboard.jpg)
+        ![Policy Lapse Dashboard](C:\Users\HP\OneDrive\Dokumen\GitHub\Policy_Lapse_LifeInsurance\Dashboard.jpg)
 
 ## Next Steps
 
