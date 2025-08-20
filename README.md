@@ -58,7 +58,7 @@ Policy_Lapse_LifeInsurance/
 
 ## Deploy the model with Streamlit
 
-        ![Dashboard](Dashboard.jpg)
+        Dashboard.jpg
 ## Next Steps
 
 Tune hyperparameters for better accuracy.
