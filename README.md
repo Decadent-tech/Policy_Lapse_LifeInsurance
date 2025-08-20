@@ -56,6 +56,9 @@ Policy_Lapse_LifeInsurance/
 
         python policy_lapse.py
 
+## Deploy the model with Streamlit
+
+        ![Dashboard](<WhatsApp Image 2025-08-20 at 23.41.53_403a18e1.jpg>)
 ## Next Steps
 
 Tune hyperparameters for better accuracy.
