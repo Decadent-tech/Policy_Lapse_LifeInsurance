@@ -903,3 +903,12 @@ plt.savefig('Visualization/Precision_Recall_Curve.png', bbox_inches='tight')
 plt.legend()
 plt.show()
 
+
+# Saving the best model using joblib
+import joblib   
+
+# Save the best XG Boost model and preprocessing steps
+joblib.dump(xgb_xgb_model, 'model/best_rf_model.pkl')
+# Save the preprocessing steps
+joblib.dump(le, 'model/label_encoder.pkl')
+
