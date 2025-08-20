@@ -413,7 +413,7 @@ print("Standard Deviation of Cross-Validation Scores:", std_dev)
 
 
 plot_learning_curve(xg_classifier, X_train_encoded, y_train, cv=10, n_jobs=-1)
-plt.show()
+# plt.show()
 plt.savefig('Visualization/Learning_Curve_XG_Boost.png', bbox_inches='tight')
 
 
@@ -453,7 +453,7 @@ ax.set_title('Confusion matrix', fontsize=15,  fontweight='bold')
 ax.set_xticklabels(ax.xaxis.get_ticklabels(), fontsize=11, ha= 'center', rotation=0 )
 ax.set_yticklabels(ax.yaxis.get_ticklabels(), fontsize=11, va="center", rotation=0)
 plt.savefig('Visualization/Confusion_Matrix_XG_Boost_Annotated.png', bbox_inches='tight')
-plt.show();
+# plt.show();
 
 print(X_train.dtypes) # Displaying the data types of the features in X_train
 
@@ -521,7 +521,7 @@ print("Mean Cross-Validation Score:", mean_score)
 print("Standard Deviation of Cross-Validation Scores:", std_dev)
 
 plot_learning_curve(rf_model, X_train_xgb_encoded, y_train, cv=10, n_jobs=-1)
-plt.show()
+# plt.show()
 plt.savefig('Visualization/Learning_Curve_Random_Forest_XG_Boost_Feature_Selected.png', bbox_inches='tight')
 
 # Evaluation Metrics
@@ -560,7 +560,7 @@ ax.set_title('Confusion matrix', fontsize=15,  fontweight='bold')
 ax.set_xticklabels(ax.xaxis.get_ticklabels(), fontsize=11, ha= 'center', rotation=0 )
 ax.set_yticklabels(ax.yaxis.get_ticklabels(), fontsize=11, va="center", rotation=0)
 plt.savefig('Visualization/Confusion_Matrix_Random_Forest_XG_Boost_Feature_Selected_Annotated.png', bbox_inches='tight')
-plt.show();
+# plt.show();
 
 # Evaluation Metrics of XG Boost Feature Selected XG Boost¶
 scale_pos_weight_value = class_ratio
@@ -585,7 +585,7 @@ print("Mean Cross-Validation Score:", mean_score)
 print("Standard Deviation of Cross-Validation Scores:", std_dev)
 
 plot_learning_curve(xgb_xgb_model, X_train_xgb_encoded, y_train, cv=10, n_jobs=-1)
-plt.show()
+# plt.show()
 plt.savefig('Visualization/Learning_Curve_XG_Boost_XG_Boost_Feature_Selected.png', bbox_inches='tight')
 
 # Evaluation Metrics
@@ -625,7 +625,7 @@ ax.set_title('Confusion matrix', fontsize=15,  fontweight='bold')
 ax.set_xticklabels(ax.xaxis.get_ticklabels(), fontsize=11, ha= 'center', rotation=0 )
 ax.set_yticklabels(ax.yaxis.get_ticklabels(), fontsize=11, va="center", rotation=0)
 plt.savefig('Visualization/Confusion_Matrix_XG_Boost_XG_Boost_Feature_Selected_Annotated.png', bbox_inches='tight')
-plt.show();
+# plt.show();
 
 # Comparative Analysis
 
@@ -663,7 +663,7 @@ plt.title('Precision-Recall Curve')
 plt.ylim([0.0, 1.05])
 plt.xlim([0.0, 1.0])
 plt.legend(loc='lower left')
-plt.show()
+# plt.show()
 plt.savefig('Visualization/Precision_Recall_Curve.png', bbox_inches='tight')    
 
 # Features Extraction from the Best Model
@@ -682,7 +682,7 @@ plt.xlabel('Feature Importance')
 plt.ylabel('Feature')
 plt.title('Top 10 XG Boost Feature Selected XG Boost Feature Importance')
 plt.savefig('Visualization/Top_10_Features_XG_Boost.png', bbox_inches='tight')
-plt.show()
+# plt.show()
 
 booster = xgb_xgb_model.get_booster()
 
@@ -698,7 +698,7 @@ plt.xlabel('Feature Gain')
 plt.ylabel('Feature')
 plt.title('Top 10 XG Boost Feature Selected XG Boost Feature Gain')
 plt.savefig('Visualization/Top_10_Features_Gain_XG_Boost.png', bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 # Conclusion and Future Work
@@ -761,4 +761,145 @@ plt.xlabel("Ranking (Lower = Better)")
 plt.ylabel("Feature")
 plt.gca().invert_yaxis()
 plt.savefig('Visualization/RFE_Feature_Ranking_RF_vs_XGB.png', bbox_inches='tight')
+# plt.show()
+
+# The above code provides a comprehensive analysis of the policy lapse prediction problem using machine learning techniques.
+# It includes data preprocessing, feature selection using statistical methods and XG Boost feature importance,
+# model training with Random Forest and XG Boost, evaluation of model performance, and visualization of results.
+
+# Get rankings
+rf_ranking = pd.Series(rfe_xgb_rf.ranking_, index=X_train_xgb_encoded.columns)
+xgb_ranking = pd.Series(rfe_xgb_xgb.ranking_, index=X_train_xgb_encoded.columns)
+
+# Combine into one DataFrame
+feature_rankings = pd.DataFrame({
+    "RF_Ranking": rf_ranking,
+    "XGB_Ranking": xgb_ranking
+}).sort_values(by=["RF_Ranking", "XGB_Ranking"])
+
+print(feature_rankings.head(15))
+
+# Train RF with RFE-selected features
+rf_model.fit(X_train_xgb_encoded[selected_features_xgb_rf], y_train)
+rf_preds = rf_model.predict(X_test_xgb_encoded[selected_features_xgb_rf])
+
+# Train XGB with RFE-selected features
+xgb_xgb_model.fit(X_train_xgb_encoded[selected_features_xgb_xgb], y_train)
+xgb_preds = xgb_xgb_model.predict(X_test_xgb_encoded[selected_features_xgb_xgb])
+
+print("RF (RFE features) F1:", f1_score(y_test, rf_preds))
+print("XGB (RFE features) F1:", f1_score(y_test, xgb_preds))
+
+rf_importance = rf_model.feature_importances_
+plt.barh(selected_features_xgb_rf, rf_importance[:len(selected_features_xgb_rf)])
+plt.title("Random Forest Feature Importances (RFE Selected)")
+plt.savefig('Visualization/RF_Feature_Importances_RFE_Selected.png', bbox_inches='tight')
+# plt.show()
+
+rf_cv_scores = cross_val_score(rf_model, 
+                               X_train_xgb_encoded[selected_features_xgb_rf], 
+                               y_train, cv=5, scoring="f1")
+print("RF RFE CV F1:", rf_cv_scores.mean())
+
+common_features = list(set(selected_features_xgb_rf) & set(selected_features_xgb_xgb))
+union_features = list(set(selected_features_xgb_rf) | set(selected_features_xgb_xgb))
+
+print("Common Features:", common_features)
+print("Union Features:", union_features)
+
+# Compare Multiple Models
+
+models = {
+    "Random Forest": rf_classifier_best_value,
+    "XG Boost": xg_classifier,
+    "RF with RFE Features": rf_model,
+    "XGB with RFE Features": xgb_xgb_model
+}
+results = {}
+for name, model in models.items():
+    model.fit(X_train_encoded, y_train)
+    y_pred = model.predict(X_test_encoded)
+    results[name] = {
+        "Accuracy": accuracy_score(y_test, y_pred),
+        "Precision": precision_score(y_test, y_pred),
+        "Recall": recall_score(y_test, y_pred),
+        "F1 Score": f1_score(y_test, y_pred)
+    }
+results_df = pd.DataFrame(results).T
+print("Model Comparison Results:")
+print(results_df)
+# Visualizing Model Comparison
+results_df.plot(kind='bar', figsize=(10, 6))
+plt.title("Model Comparison")
+plt.ylabel("Score")
+plt.xticks(rotation=45)
+plt.savefig('Visualization/Model_Comparison.png', bbox_inches='tight')
+#plt.show()
+
+
+# Model Evaluation (Cross-Validation & Metrics)
+f1_scores = cross_val_score(rf_model, X_train_xgb_encoded, y_train, cv=5, scoring='f1')
+print("CV F1 Mean:", f1_scores.mean())
+
+# Predictions on test set
+y_pred = rf_model.predict(X_test_xgb_encoded)
+y_prob = rf_model.predict_proba(X_test_xgb_encoded)[:, 1]
+
+print(classification_report(y_test, y_pred))
+print("ROC AUC:", roc_auc_score(y_test, y_prob))
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+plt.savefig('Visualization/Confusion_Matrix_RF_RFE_Selected.png', bbox_inches='tight')
 plt.show()
+
+# ROC Curve
+fpr, tpr, _ = roc_curve(y_test, y_prob)
+plt.plot(fpr, tpr, label="ROC Curve")
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.legend()
+plt.savefig('Visualization/ROC_Curve.png', bbox_inches='tight')
+plt.show()
+
+# Model comparison (RF vs XGB vs Ensemble)
+
+f1_scores = cross_val_score(rf_model, X_train_xgb_encoded, y_train, cv=5, scoring='f1')
+print("CV F1 Mean:", f1_scores.mean())
+
+# Predictions on test set
+y_pred = rf_model.predict(X_test_xgb_encoded)
+y_prob = rf_model.predict_proba(X_test_xgb_encoded)[:, 1]
+
+
+print(classification_report(y_test, y_pred))
+
+print("ROC AUC:", roc_auc_score(y_test, y_prob))
+
+
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Not Lapsed","Lapsed"], yticklabels=["Not Lapsed","Lapsed"])
+plt.savefig('Visualization/Confusion_Matrix_RF_RFE_Selected.png', bbox_inches='tight')
+plt.show()
+
+fpr, tpr, _ = roc_curve(y_test, y_prob)
+plt.plot(fpr, tpr, label="ROC Curve")
+plt.plot([0,1],[0,1],'--',color='grey')
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve")
+plt.legend()
+plt.savefig('Visualization/ROC_Curve.png', bbox_inches='tight')
+plt.show()
+
+
+prec, rec, _ = precision_recall_curve(y_test, y_prob)
+plt.plot(rec, prec, label="PR Curve")
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision-Recall Curve")
+plt.savefig('Visualization/Precision_Recall_Curve.png', bbox_inches='tight')
+plt.legend()
+plt.show()
+
